@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="OPORD Trainer">
+<meta name="theme-color" content="#141810">
+<title>OPORD Trainer — ROTC Advanced Camp Prep</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header id="topbar">
+  <div class="brand"><span class="brand-icon">&#10010;</span> OPORD TRAINER</div>
+  <div class="streak" id="streakBadge" title="Daily training streak">&#128293; <span id="streakCount">0</span></div>
+</header>
+
+<main id="content">
+
+  <!-- ============ TODAY TAB ============ -->
+  <section class="tab-panel" id="tab-today">
+    <div class="card hero">
+      <div class="card-label">TASK OF THE DAY</div>
+      <h2 id="dailyTitle">—</h2>
+      <p id="dailyDesc">—</p>
+      <button class="btn btn-primary" id="dailyGo">START TASK</button>
+      <button class="btn btn-ghost" id="dailyDone">MARK COMPLETE &#10003;</button>
+      <p class="hint" id="dailyStatus"></p>
+    </div>
+    <div class="card">
+      <div class="card-label">PROGRESS</div>
+      <div class="stat-row">
+        <div class="stat"><div class="stat-num" id="statStreak">0</div><div class="stat-name">Day streak</div></div>
+        <div class="stat"><div class="stat-num" id="statTotal">0</div><div class="stat-name">Tasks done</div></div>
+        <div class="stat"><div class="stat-num" id="statOrders">0</div><div class="stat-name">Orders briefed</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">QUICK START</div>
+      <div class="quick-grid">
+        <button class="quick" data-goto="orders">&#128220;<span>Random OPORD</span></button>
+        <button class="quick" data-goto="drills">&#9876;&#65039;<span>Battle Drills</span></button>
+        <button class="quick" data-goto="study">&#127183;<span>Flashcards</span></button>
+        <button class="quick" data-goto="study-tlp">&#128203;<span>TLP Quiz</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ORDERS TAB ============ -->
+  <section class="tab-panel hidden" id="tab-orders">
+    <div class="card" id="orderControls">
+      <div class="card-label">GENERATE AN ORDER</div>
+      <div class="seg" id="orderTypeSeg">
+        <button class="seg-btn active" data-otype="OPORD">OPORD</button>
+        <button class="seg-btn" data-otype="WARNORD">WARNORD</button>
+        <button class="seg-btn" data-otype="FRAGO">FRAGO</button>
+      </div>
+      <label class="field-label" for="missionSel">Mission type</label>
+      <select id="missionSel">
+        <option value="random">Random mission</option>
+      </select>
+      <button class="btn btn-primary" id="genOrder">GENERATE</button>
+    </div>
+
+    <div id="orderView" class="hidden">
+      <div class="order-toolbar">
+        <button class="btn btn-small" id="btnNewOrder">&#8635; New</button>
+        <button class="btn btn-small" id="btnReadAloud">&#128266; Read aloud</button>
+        <button class="btn btn-small btn-primary" id="btnBriefBack">&#127908; Brief it back</button>
+      </div>
+      <div class="card order-card">
+        <div class="order-header" id="orderTitle"></div>
+        <div id="orderBody"></div>
+      </div>
+    </div>
+
+    <!-- Brief-back mode chooser -->
+    <div id="briefChooser" class="hidden">
+      <div class="card">
+        <div class="card-label">BRIEF-BACK MODE</div>
+        <button class="btn btn-primary big-mode" id="modeReveal">
+          <b>RECITE &amp; REVEAL</b>
+          <small>Brief each paragraph from memory out loud, then reveal it and grade yourself.</small>
+        </button>
+        <button class="btn btn-primary big-mode" id="modeSpeech">
+          <b>SPEECH CHECK</b>
+          <small>The app listens while you brief the whole order and scores the key items you hit.</small>
+        </button>
+        <button class="btn btn-ghost" id="briefCancel">Back to order</button>
+      </div>
+    </div>
+
+    <!-- Recite & Reveal -->
+    <div id="revealMode" class="hidden">
+      <div class="card">
+        <div class="card-label">RECITE &amp; REVEAL — <span id="revealProgress"></span></div>
+        <h3 id="revealSectionTitle"></h3>
+        <p class="hint">Brief this paragraph out loud from memory, then reveal it.</p>
+        <div id="revealBody" class="hidden order-section-body"></div>
+        <button class="btn btn-primary" id="revealBtn">REVEAL PARAGRAPH</button>
+        <div id="gradeBtns" class="hidden grade-row">
+          <button class="btn grade-good" id="gradeGood">&#10003; GOT IT</button>
+          <button class="btn grade-bad" id="gradeBad">&#10007; MISSED IT</button>
+        </div>
+        <button class="btn btn-ghost" id="revealQuit">Quit</button>
+      </div>
+    </div>
+
+    <!-- Speech check -->
+    <div id="speechMode" class="hidden">
+      <div class="card">
+        <div class="card-label">SPEECH CHECK</div>
+        <p class="hint" id="speechHint">Tap the mic, then brief the full order out loud using the OPORD shell. Tap stop when finished.</p>
+        <div class="mic-wrap">
+          <button class="mic-btn" id="micBtn">&#127908;</button>
+          <div class="mic-state" id="micState">TAP TO START</div>
+        </div>
+        <div id="transcriptBox" class="hidden">
+          <div class="card-label">WHAT I HEARD</div>
+          <p id="transcriptText" class="transcript"></p>
+        </div>
+        <button class="btn btn-primary hidden" id="scoreSpeech">SCORE MY BRIEF</button>
+        <button class="btn btn-ghost" id="speechQuit">Quit</button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="resultsView" class="hidden">
+      <div class="card">
+        <div class="card-label">RESULTS</div>
+        <div class="score-big" id="scoreBig">—</div>
+        <div id="resultsList"></div>
+        <button class="btn btn-primary" id="resultsRetry">BRIEF IT AGAIN</button>
+        <button class="btn btn-ghost" id="resultsBack">Back to order</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DRILLS TAB ============ -->
+  <section class="tab-panel hidden" id="tab-drills">
+    <div id="drillList">
+      <div class="card">
+        <div class="card-label">BATTLE DRILLS</div>
+        <p class="hint">Pick a drill (or get a random one), recite the steps out loud, then reveal and self-grade.</p>
+        <button class="btn btn-primary" id="randomDrill">&#127922; RANDOM DRILL</button>
+        <div id="drillButtons"></div>
+      </div>
+    </div>
+    <div id="drillView" class="hidden">
+      <div class="card">
+        <div class="card-label">BATTLE DRILL</div>
+        <h3 id="drillTitle"></h3>
+        <p class="hint">Recite every step out loud, in order. Then reveal.</p>
+        <ol id="drillSteps" class="hidden drill-steps"></ol>
+        <button class="btn btn-primary" id="drillReveal">REVEAL STEPS</button>
+        <div id="drillGrade" class="hidden grade-row">
+          <button class="btn grade-good" id="drillGood">&#10003; GOT IT</button>
+          <button class="btn grade-bad" id="drillBad">&#10007; MISSED SOME</button>
+        </div>
+        <button class="btn btn-ghost" id="drillBack">Back to drills</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STUDY TAB ============ -->
+  <section class="tab-panel hidden" id="tab-study">
+    <div id="studyHome">
+      <div class="card">
+        <div class="card-label">STUDY</div>
+        <button class="btn btn-primary big-mode" id="startFlash">
+          <b>DOCTRINE FLASHCARDS</b>
+          <small>METT-TC, OAKOC, SALUTE, GOTWA, 9-line MEDEVAC, principles of patrolling, and more.</small>
+        </button>
+        <button class="btn btn-primary big-mode" id="startTlp">
+          <b>TLP ORDER QUIZ</b>
+          <small>Put the 8 Troop Leading Procedures in the correct sequence.</small>
+        </button>
+      </div>
+    </div>
+    <div id="flashView" class="hidden">
+      <div class="card flashcard" id="flashCard">
+        <div class="card-label" id="flashProgress"></div>
+        <div class="flash-front" id="flashFront"></div>
+        <div class="flash-back hidden" id="flashBack"></div>
+        <button class="btn btn-primary" id="flashFlip">FLIP</button>
+        <div id="flashGrade" class="hidden grade-row">
+          <button class="btn grade-good" id="flashGood">&#10003; KNEW IT</button>
+          <button class="btn grade-bad" id="flashBad">&#10007; DIDN'T</button>
+        </div>
+        <button class="btn btn-ghost" id="flashQuit">Quit</button>
+      </div>
+    </div>
+    <div id="tlpView" class="hidden">
+      <div class="card">
+        <div class="card-label">TROOP LEADING PROCEDURES</div>
+        <p class="hint">Tap the steps in the correct order (1 &#8594; 8).</p>
+        <div id="tlpSlots" class="tlp-slots"></div>
+        <div id="tlpChoices" class="tlp-choices"></div>
+        <p id="tlpMsg" class="hint"></p>
+        <button class="btn btn-primary hidden" id="tlpAgain">GO AGAIN</button>
+        <button class="btn btn-ghost" id="tlpQuit">Quit</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<nav id="tabbar">
+  <button class="tab-btn active" data-tab="today">&#9873;<span>Today</span></button>
+  <button class="tab-btn" data-tab="orders">&#128220;<span>Orders</span></button>
+  <button class="tab-btn" data-tab="drills">&#9876;&#65039;<span>Drills</span></button>
+  <button class="tab-btn" data-tab="study">&#127183;<span>Study</span></button>
+</nav>
+
+<script src="js/data.js"></script>
+<script src="js/generator.js"></script>
+<script src="js/app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  try { navigator.serviceWorker.register('sw.js'); } catch (e) { /* not available (e.g. artifact preview) */ }
+}
+</script>
+</body>
+</html>
