@@ -21,8 +21,13 @@ drills you on briefing them back, battle drills, and core doctrine.
 - **Battle drills** — react to contact, squad attack, break contact, near/far
   ambush, indirect fire, patrol base priorities of work. Recite → reveal →
   self-grade.
+- **Interactive land nav** — a freshly generated topo-style map every round,
+  with three games: plot a 6-digit grid by tapping the map (scored by meters
+  off), read the grid of a marked point, and estimate azimuth & distance
+  between two points. Best scores are saved per mode.
 - **Doctrine flashcards** — METT-TC, OAKOC, SALUTE, GOTWA, ADDRAC, 9-line
-  MEDEVAC, principles of patrolling, TLPs, and 20+ more.
+  MEDEVAC, principles of patrolling, TLPs, back azimuth, terrain features,
+  and 25+ more.
 - **TLP sequence quiz** — put the 8 Troop Leading Procedures in order.
 - **Task of the day + streak tracking** — a rotating daily drill with a streak
   counter, stored on your device.
@@ -60,6 +65,7 @@ css/style.css         Night-ops theme
 js/data.js            Battle drills, flashcards, TLP steps, daily tasks
 js/generator.js       Random OPORD / WARNORD / FRAGO generator + scoring keys
 js/app.js             UI logic, speech recognition, TTS, streaks
+js/landnav.js         Land nav games: procedural topo map, plot/read/azimuth
 sw.js                 Service worker (offline cache)
 manifest.webmanifest  PWA manifest
 icons/                App icons

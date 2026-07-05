@@ -47,6 +47,7 @@
         <button class="quick" data-goto="drills">&#9876;&#65039;<span>Battle Drills</span></button>
         <button class="quick" data-goto="study">&#127183;<span>Flashcards</span></button>
         <button class="quick" data-goto="study-tlp">&#128203;<span>TLP Quiz</span></button>
+        <button class="quick" data-goto="nav">&#129517;<span>Land Nav</span></button>
       </div>
     </div>
   </section>
@@ -167,6 +168,52 @@
     </div>
   </section>
 
+  <!-- ============ LAND NAV TAB ============ -->
+  <section class="tab-panel hidden" id="tab-nav">
+    <div id="navHome">
+      <div class="card">
+        <div class="card-label">LAND NAV PRACTICE</div>
+        <p class="hint">A fresh map every round. 5 rounds per game, 100 points possible. Remember: read right, then up.</p>
+        <button class="btn btn-primary big-mode" data-navmode="plot">
+          <b>PLOT THE POINT</b>
+          <small>You get a 6-digit grid — tap the map where it falls. Scored by meters off.</small>
+        </button>
+        <button class="btn btn-primary big-mode" data-navmode="read">
+          <b>READ THE GRID</b>
+          <small>A point is marked — type its 6-digit grid coordinate.</small>
+        </button>
+        <button class="btn btn-primary big-mode" data-navmode="az">
+          <b>AZIMUTH &amp; DISTANCE</b>
+          <small>Estimate the grid azimuth and distance between two plotted points.</small>
+        </button>
+        <p class="hint" id="navBest"></p>
+      </div>
+    </div>
+    <div id="navGame" class="hidden">
+      <div class="card">
+        <div class="card-label" id="navRound"></div>
+        <div class="card-label" id="navModeName" style="color: var(--accent);"></div>
+        <p id="navPrompt"></p>
+        <div class="nav-map-wrap"><canvas id="navCanvas"></canvas></div>
+        <div id="navReadRow" class="hidden nav-input-row">
+          <input id="navGridIn" inputmode="numeric" maxlength="7" placeholder="6-digit grid, e.g. 873456" autocomplete="off">
+        </div>
+        <div id="navAzRow" class="hidden nav-input-row">
+          <input id="navAzIn" inputmode="numeric" placeholder="Azimuth °" autocomplete="off">
+          <input id="navDistIn" inputmode="numeric" placeholder="Distance m" autocomplete="off">
+        </div>
+        <p id="navFeedback" class="hint"></p>
+        <button class="btn btn-primary" id="navSubmit">SUBMIT</button>
+        <button class="btn btn-primary hidden" id="navNext">NEXT ROUND</button>
+        <div id="navAgainRow" class="hidden grade-row">
+          <button class="btn grade-good" id="navAgain">&#8635; PLAY AGAIN</button>
+          <button class="btn" id="navHomeBtn">MODES</button>
+        </div>
+        <button class="btn btn-ghost" id="navQuit">Quit</button>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ STUDY TAB ============ -->
   <section class="tab-panel hidden" id="tab-study">
     <div id="studyHome">
@@ -214,12 +261,14 @@
   <button class="tab-btn active" data-tab="today">&#9873;<span>Today</span></button>
   <button class="tab-btn" data-tab="orders">&#128220;<span>Orders</span></button>
   <button class="tab-btn" data-tab="drills">&#9876;&#65039;<span>Drills</span></button>
+  <button class="tab-btn" data-tab="nav">&#129517;<span>Nav</span></button>
   <button class="tab-btn" data-tab="study">&#127183;<span>Study</span></button>
 </nav>
 
 <script src="js/data.js"></script>
 <script src="js/generator.js"></script>
 <script src="js/app.js"></script>
+<script src="js/landnav.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
   try { navigator.serviceWorker.register('sw.js'); } catch (e) { /* not available (e.g. artifact preview) */ }
