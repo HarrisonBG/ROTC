@@ -110,6 +110,10 @@ const FLASHCARDS = [
   { front: "PACE Plan", back: "Communications planning:\nPrimary\nAlternate\nContingency\nEmergency" },
   { front: "Rally Points (types)", back: "Initial rally point (IRP)\nEn route rally point (ERP)\nObjective rally point (ORP)\nReentry rally point (RRP)\nNear-side / far-side rally points (danger areas)" },
   { front: "Actions at the ORP", back: "Occupy the ORP (usually by force or after leader's recon)\nEstablish security\nConduct leader's recon of the objective\nIssue the 5-point contingency plan (GOTWA)\nMake final preparations: drop rucks, prep weapons/equipment\nConfirm the plan and disseminate changes" },
+  { front: "Back Azimuth", back: "If the azimuth is less than 180°: add 180.\nIf the azimuth is 180° or more: subtract 180.\n\nExample: azimuth 040° → back azimuth 220°." },
+  { front: "Grid Coordinate Precision", back: "4-digit grid — 1,000m square\n6-digit grid — 100m square\n8-digit grid — 10m square\n\nAlways read RIGHT (easting), then UP (northing)." },
+  { front: "5 Major Terrain Features", back: "Hill\nRidge\nValley\nSaddle\nDepression\n\nMinor: draw, spur, cliff.\nSupplementary: cut, fill." },
+  { front: "Contour Lines", back: "Index — every 5th line, heavier, labeled with elevation\nIntermediate — the 4 lighter lines between index lines\nSupplementary — dashed, half the contour interval\n\nClose together = steep. Far apart = gentle." },
   { front: "Consolidate & Reorganize (after the assault)", back: "Establish 360-degree security at the LOA\nRe-establish the chain of command\nACE/LACE reports from team leaders\nTreat and evacuate casualties\nSearch, silence, segregate, safeguard, speed EPWs to the rear (5 S's and T)\nRedistribute ammunition and equipment\nReport to higher" }
 ];
 
@@ -131,5 +135,6 @@ const DAILY_TASKS = [
   { title: "WARNORD Speed Brief", desc: "Generate a WARNORD and brief it back inside 3 minutes. WARNORDs are short — nail the timeline.", goto: "orders" },
   { title: "TLP + Mission Statement Drill", desc: "Do the TLP order quiz twice, then generate an OPORD and recite only the mission statement — twice, word for word.", goto: "study" },
   { title: "FRAGO Reaction Drill", desc: "Generate a FRAGO and brief back what changed and what stays the same. Camp loves to hit you with changes.", goto: "orders" },
-  { title: "Commander's Intent Focus", desc: "Generate an OPORD and brief back paragraph 3 only: intent (purpose, key tasks, end state), concept, and tasks to subordinate units.", goto: "orders" }
+  { title: "Commander's Intent Focus", desc: "Generate an OPORD and brief back paragraph 3 only: intent (purpose, key tasks, end state), concept, and tasks to subordinate units.", goto: "orders" },
+  { title: "Land Nav Gauntlet", desc: "One full game of each land nav mode: Plot the Point, Read the Grid, and Azimuth & Distance. Aim for 65+ in each.", goto: "nav" }
 ];

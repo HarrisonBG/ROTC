@@ -34,7 +34,7 @@
   }
 
   // ---------------- tabs ----------------
-  const TABS = ["today", "orders", "drills", "study"];
+  const TABS = ["today", "orders", "drills", "nav", "study"];
   function goTab(name) {
     TABS.forEach(t => {
       $("tab-" + t).classList.toggle("hidden", t !== name);

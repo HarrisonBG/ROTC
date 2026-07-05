@@ -188,6 +188,27 @@ select {
 .tlp-chip.used { opacity: 0.25; pointer-events: none; }
 .tlp-chip.wrong { background: var(--bad); border-color: var(--bad); }
 
+/* Land nav */
+.quick-grid .quick:last-child:nth-child(odd) { grid-column: span 2; }
+.nav-map-wrap { margin: 10px 0; }
+#navCanvas {
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  touch-action: manipulation;
+  cursor: crosshair;
+}
+.nav-input-row { display: flex; gap: 10px; margin-top: 8px; }
+.nav-input-row input {
+  flex: 1; min-width: 0;
+  padding: 12px; border-radius: 10px;
+  background: var(--panel-2); color: var(--text);
+  border: 1px solid var(--line); font: inherit;
+}
+.nav-input-row input::placeholder { color: var(--dim); }
+#navPrompt b { color: var(--accent); }
+#navFeedback b { color: var(--accent); }
+
 /* Tab bar */
 #tabbar {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
