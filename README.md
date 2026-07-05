@@ -22,9 +22,9 @@ drills you on briefing them back, battle drills, and core doctrine.
   ambush, indirect fire, patrol base priorities of work. Recite → reveal →
   self-grade.
 - **Interactive land nav** — a freshly generated topo-style map every round,
-  with three games: plot a 6-digit grid by tapping the map (scored by meters
-  off), read the grid of a marked point, and estimate azimuth & distance
-  between two points. Best scores are saved per mode.
+  with three games: plot an 8-digit grid by tapping the map (scored by meters
+  off), read the 8-digit grid of a marked point, and estimate azimuth &
+  distance between two points. Best scores are saved per mode.
 - **Doctrine flashcards** — METT-TC, OAKOC, SALUTE, GOTWA, ADDRAC, 9-line
   MEDEVAC, principles of patrolling, TLPs, back azimuth, terrain features,
   and 25+ more.

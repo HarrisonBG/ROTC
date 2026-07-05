@@ -1,7 +1,7 @@
 // OPORD Trainer — interactive land navigation practice
 // Procedurally generated topographic-style map on a canvas with three games:
-//   PLOT  — given a 6-digit grid, tap the map on that point (scored by meters off)
-//   READ  — a point is marked; enter its 6-digit grid
+//   PLOT  — given an 8-digit grid, tap the map on that point (scored by meters off)
+//   READ  — a point is marked; enter its 8-digit grid
 //   AZ    — two points are marked; estimate grid azimuth and distance
 (() => {
   const $ = id => document.getElementById(id);
@@ -14,12 +14,12 @@
   const MODES = {
     plot: {
       name: "PLOT THE POINT",
-      desc: "You get a 6-digit grid — tap the map where it falls. Scored by how many meters you're off.",
+      desc: "You get an 8-digit grid — tap the map where it falls. Scored by how many meters you're off.",
       sizeM: 2000
     },
     read: {
       name: "READ THE GRID",
-      desc: "A point is marked on the map — type its 6-digit grid coordinate.",
+      desc: "A point is marked on the map — type its 8-digit grid coordinate.",
       sizeM: 2000
     },
     az: {
@@ -89,11 +89,11 @@
     return map;
   }
 
-  // 6-digit grid string for a point (meters east/north of map SW corner)
-  function grid6(map, xm, ym) {
+  // 8-digit grid string for a point (10m precision; meters east/north of map SW corner)
+  function grid8(map, xm, ym) {
     const e = map.eLabel + Math.floor(xm / 1000);
     const n = map.nLabel + Math.floor(ym / 1000);
-    return `${pad2(e)}${Math.floor((xm % 1000) / 100)} ${pad2(n)}${Math.floor((ym % 1000) / 100)}`;
+    return `${pad2(e)}${pad2(Math.floor((xm % 1000) / 10))} ${pad2(n)}${pad2(Math.floor((ym % 1000) / 10))}`;
   }
 
   // ---------- drawing ----------
@@ -250,7 +250,7 @@
 
   function randPoint(margin) {
     const m = margin || 250;
-    const snap = v => Math.round(v / 100) * 100; // 6-digit precision
+    const snap = v => Math.round(v / 10) * 10; // 8-digit (10m) precision
     return {
       x: snap(m + Math.random() * (map.sizeM - 2 * m)),
       y: snap(m + Math.random() * (map.sizeM - 2 * m))
@@ -269,12 +269,12 @@
     $("navGridIn").value = ""; $("navAzIn").value = ""; $("navDistIn").value = "";
 
     if (mode === "plot") {
-      $("navPrompt").innerHTML = `Plot grid <b>${grid6(map, target.x, target.y)}</b> — tap the map on that point, then submit.`;
+      $("navPrompt").innerHTML = `Plot grid <b>${grid8(map, target.x, target.y)}</b> — tap the map on that point, then submit.`;
       drawMap(map, []);
       show($("navSubmit"));
       $("navSubmit").disabled = true;
     } else if (mode === "read") {
-      $("navPrompt").innerHTML = `What is the 6-digit grid of the marked point <b>✕</b>?`;
+      $("navPrompt").innerHTML = `What is the 8-digit grid of the marked point <b>✕</b>?`;
       drawMap(map, [{ ...target, shape: "x", color: "#b3202a" }]);
       show($("navReadRow")); show($("navSubmit"));
       $("navSubmit").disabled = false;
@@ -334,12 +334,14 @@
       feedback(pts, `You were <b>${d}m</b> off. (≤50m for full points.)`);
     } else if (mode === "read") {
       const raw = $("navGridIn").value.replace(/\D/g, "");
-      if (raw.length !== 6) { $("navFeedback").textContent = "Enter all 6 digits (e.g. 873456)."; return; }
-      const truth = grid6(map, target.x, target.y).replace(/\s/g, "");
-      const eOff = Math.abs(parseInt(raw.slice(0, 3), 10) - parseInt(truth.slice(0, 3), 10));
-      const nOff = Math.abs(parseInt(raw.slice(3), 10) - parseInt(truth.slice(3), 10));
-      const pts = (eOff === 0 && nOff === 0) ? 20 : (eOff <= 1 && nOff <= 1) ? 10 : 0;
-      feedback(pts, `Correct grid: <b>${grid6(map, target.x, target.y)}</b>. You said ${raw.slice(0, 3)} ${raw.slice(3)}${pts === 20 ? " — exact. ✓" : pts === 10 ? " — within 100m." : "."}`);
+      if (raw.length !== 8) { $("navFeedback").textContent = "Enter all 8 digits (e.g. 87324561)."; return; }
+      const truth = grid8(map, target.x, target.y).replace(/\s/g, "");
+      // per-axis error in meters (each 4-digit half reads to 10m)
+      const eErr = Math.abs(parseInt(raw.slice(0, 4), 10) - parseInt(truth.slice(0, 4), 10)) * 10;
+      const nErr = Math.abs(parseInt(raw.slice(4), 10) - parseInt(truth.slice(4), 10)) * 10;
+      const worst = Math.max(eErr, nErr);
+      const pts = worst <= 20 ? 20 : worst <= 50 ? 12 : worst <= 100 ? 5 : 0;
+      feedback(pts, `Correct grid: <b>${grid8(map, target.x, target.y)}</b>. You said ${raw.slice(0, 4)} ${raw.slice(4)} — off by ${worst}m${pts === 20 ? ". ✓" : "."} (≤20m for full points.)`);
     } else {
       const az = parseFloat($("navAzIn").value);
       const dGuess = parseFloat($("navDistIn").value);

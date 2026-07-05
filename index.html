@@ -176,11 +176,11 @@
         <p class="hint">A fresh map every round. 5 rounds per game, 100 points possible. Remember: read right, then up.</p>
         <button class="btn btn-primary big-mode" data-navmode="plot">
           <b>PLOT THE POINT</b>
-          <small>You get a 6-digit grid — tap the map where it falls. Scored by meters off.</small>
+          <small>You get an 8-digit grid — tap the map where it falls. Scored by meters off.</small>
         </button>
         <button class="btn btn-primary big-mode" data-navmode="read">
           <b>READ THE GRID</b>
-          <small>A point is marked — type its 6-digit grid coordinate.</small>
+          <small>A point is marked — type its 8-digit grid coordinate.</small>
         </button>
         <button class="btn btn-primary big-mode" data-navmode="az">
           <b>AZIMUTH &amp; DISTANCE</b>
@@ -196,7 +196,7 @@
         <p id="navPrompt"></p>
         <div class="nav-map-wrap"><canvas id="navCanvas"></canvas></div>
         <div id="navReadRow" class="hidden nav-input-row">
-          <input id="navGridIn" inputmode="numeric" maxlength="7" placeholder="6-digit grid, e.g. 873456" autocomplete="off">
+          <input id="navGridIn" inputmode="numeric" maxlength="9" placeholder="8-digit grid, e.g. 87324561" autocomplete="off">
         </div>
         <div id="navAzRow" class="hidden nav-input-row">
           <input id="navAzIn" inputmode="numeric" placeholder="Azimuth °" autocomplete="off">
