@@ -15,8 +15,21 @@
 </head>
 <body>
 
+<div id="splash" aria-hidden="true">
+  <div class="splash-inner">
+    <img src="icons/orleans-battalion-crest.svg" alt="" class="splash-crest">
+    <div class="splash-unit">ORLEANS BATTALION</div>
+    <div class="splash-app">OPORD TRAINER</div>
+    <div class="splash-rule"></div>
+    <div class="splash-tag">ADVANCED CAMP PREPARATION</div>
+  </div>
+</div>
+
 <header id="topbar">
-  <div class="brand"><span class="brand-icon">&#10010;</span> OPORD TRAINER</div>
+  <div class="brand">
+    <img src="icons/orleans-battalion-crest.svg" alt="" class="brand-crest">
+    <span class="brand-text">OPORD TRAINER</span>
+  </div>
   <div class="streak" id="streakBadge" title="Daily training streak">&#128293; <span id="streakCount">0</span></div>
 </header>
 
@@ -151,6 +164,11 @@
         <button class="btn btn-primary" id="randomDrill">&#127922; RANDOM DRILL</button>
         <div id="drillButtons"></div>
       </div>
+      <div class="card">
+        <div class="card-label">9-LINE MEDEVAC</div>
+        <p class="hint">A casualty scenario, then you fill in all 9 lines of the request. Scored line by line.</p>
+        <button class="btn btn-primary" id="medevacStart">&#128658; NEW SCENARIO</button>
+      </div>
     </div>
     <div id="drillView" class="hidden">
       <div class="card">
@@ -166,6 +184,26 @@
         <button class="btn btn-ghost" id="drillBack">Back to drills</button>
       </div>
     </div>
+
+    <!-- 9-Line MEDEVAC practice -->
+    <div id="medevacView" class="hidden">
+      <div class="card">
+        <div class="card-label">SITUATION</div>
+        <p id="medevacScenario"></p>
+      </div>
+      <div class="card">
+        <div class="card-label">9-LINE MEDEVAC REQUEST</div>
+        <div id="medevacForm"></div>
+        <button class="btn btn-primary" id="medevacSubmit">SUBMIT REQUEST</button>
+      </div>
+      <div id="medevacResults" class="hidden card">
+        <div class="card-label">RESULTS</div>
+        <div class="score-big" id="medevacScoreBig">—</div>
+        <div id="medevacResultsList"></div>
+        <button class="btn btn-primary" id="medevacAgain">NEW SCENARIO</button>
+      </div>
+      <button class="btn btn-ghost" id="medevacQuit">Back to drills</button>
+    </div>
   </section>
 
   <!-- ============ LAND NAV TAB ============ -->
@@ -176,11 +214,11 @@
         <p class="hint">A fresh map every round. 5 rounds per game, 100 points possible. Remember: read right, then up.</p>
         <button class="btn btn-primary big-mode" data-navmode="plot">
           <b>PLOT THE POINT</b>
-          <small>You get a 6-digit grid — tap the map where it falls. Scored by meters off.</small>
+          <small>You get an 8-digit grid — tap the map where it falls. Scored by meters off.</small>
         </button>
         <button class="btn btn-primary big-mode" data-navmode="read">
           <b>READ THE GRID</b>
-          <small>A point is marked — type its 6-digit grid coordinate.</small>
+          <small>A point is marked — type its 8-digit grid coordinate.</small>
         </button>
         <button class="btn btn-primary big-mode" data-navmode="az">
           <b>AZIMUTH &amp; DISTANCE</b>
@@ -196,11 +234,25 @@
         <p id="navPrompt"></p>
         <div class="nav-map-wrap"><canvas id="navCanvas"></canvas></div>
         <div id="navReadRow" class="hidden nav-input-row">
-          <input id="navGridIn" inputmode="numeric" maxlength="7" placeholder="6-digit grid, e.g. 873456" autocomplete="off">
+          <input id="navGridIn" inputmode="numeric" maxlength="9" placeholder="8-digit grid, e.g. 87324561" autocomplete="off">
         </div>
-        <div id="navAzRow" class="hidden nav-input-row">
-          <input id="navAzIn" inputmode="numeric" placeholder="Azimuth °" autocomplete="off">
-          <input id="navDistIn" inputmode="numeric" placeholder="Distance m" autocomplete="off">
+        <div id="navAzRow" class="hidden">
+          <div class="protractor-wrap">
+            <svg id="protractorSvg" viewBox="0 0 220 220" aria-label="Protractor: drag the arm to set an azimuth">
+              <circle class="p-face" cx="110" cy="110" r="96"/>
+              <g id="pTicks"></g>
+              <line id="pNeedle" x1="110" y1="110" x2="110" y2="24" class="p-needle"/>
+              <circle cx="110" cy="110" r="4" class="p-pivot"/>
+              <text id="pReadout" x="110" y="145" text-anchor="middle" class="p-readout">0°</text>
+              <circle id="pHandle" cx="110" cy="24" r="15" class="p-handle"/>
+            </svg>
+            <p class="hint protractor-hint">Drag the arm to sight the objective, then read the azimuth.</p>
+          </div>
+          <div class="ruler-wrap">
+            <label class="field-label" for="distRange">DISTANCE (drag to measure)</label>
+            <div class="ruler-readout"><span id="distReadout">2000</span> m</div>
+            <input type="range" id="distRange" class="ruler-slider" min="0" max="4000" step="10" value="2000">
+          </div>
         </div>
         <p id="navFeedback" class="hint"></p>
         <button class="btn btn-primary" id="navSubmit">SUBMIT</button>
@@ -265,14 +317,31 @@
   <button class="tab-btn" data-tab="study">&#127183;<span>Study</span></button>
 </nav>
 
+<!-- native-bridge-scripts-placeholder: the iOS build step injects Capacitor's
+     bridge + plugin scripts here; this comment marks the insertion point and
+     is a no-op for the plain web/GitHub Pages build. -->
+<script src="js/native.js"></script>
 <script src="js/data.js"></script>
 <script src="js/generator.js"></script>
 <script src="js/app.js"></script>
 <script src="js/landnav.js"></script>
+<script src="js/medevac.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
-  try { navigator.serviceWorker.register('sw.js'); } catch (e) { /* not available (e.g. artifact preview) */ }
+  try {
+    navigator.serviceWorker.register('sw.js').catch(() => { /* unsupported context, e.g. file:// or artifact preview */ });
+  } catch (e) { /* not available */ }
 }
+(() => {
+  const splash = document.getElementById('splash');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const holdMs = reduced ? 200 : 1500;
+  setTimeout(() => {
+    splash.classList.add('splash-out');
+    splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+    setTimeout(() => splash.remove(), 900); // fallback if transitionend doesn't fire
+  }, holdMs);
+})();
 </script>
 </body>
 </html>

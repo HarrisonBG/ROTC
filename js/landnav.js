@@ -1,7 +1,7 @@
 // OPORD Trainer — interactive land navigation practice
 // Procedurally generated topographic-style map on a canvas with three games:
-//   PLOT  — given a 6-digit grid, tap the map on that point (scored by meters off)
-//   READ  — a point is marked; enter its 6-digit grid
+//   PLOT  — given an 8-digit grid, tap the map on that point (scored by meters off)
+//   READ  — a point is marked; enter its 8-digit grid
 //   AZ    — two points are marked; estimate grid azimuth and distance
 (() => {
   const $ = id => document.getElementById(id);
@@ -14,12 +14,12 @@
   const MODES = {
     plot: {
       name: "PLOT THE POINT",
-      desc: "You get a 6-digit grid — tap the map where it falls. Scored by how many meters you're off.",
+      desc: "You get an 8-digit grid — tap the map where it falls. Scored by how many meters you're off.",
       sizeM: 2000
     },
     read: {
       name: "READ THE GRID",
-      desc: "A point is marked on the map — type its 6-digit grid coordinate.",
+      desc: "A point is marked on the map — type its 8-digit grid coordinate.",
       sizeM: 2000
     },
     az: {
@@ -89,11 +89,11 @@
     return map;
   }
 
-  // 6-digit grid string for a point (meters east/north of map SW corner)
-  function grid6(map, xm, ym) {
+  // 8-digit grid string for a point (10m precision; meters east/north of map SW corner)
+  function grid8(map, xm, ym) {
     const e = map.eLabel + Math.floor(xm / 1000);
     const n = map.nLabel + Math.floor(ym / 1000);
-    return `${pad2(e)}${Math.floor((xm % 1000) / 100)} ${pad2(n)}${Math.floor((ym % 1000) / 100)}`;
+    return `${pad2(e)}${pad2(Math.floor((xm % 1000) / 10))} ${pad2(n)}${pad2(Math.floor((ym % 1000) / 10))}`;
   }
 
   // ---------- drawing ----------
@@ -220,7 +220,104 @@
       ctx.stroke();
       ctx.setLineDash([]);
     }
+    // live sighting ray from the protractor (azimuth mode preview)
+    if (marks && marks.ray) {
+      const { x, y, angleDeg, color } = marks.ray;
+      const rad = angleDeg * Math.PI / 180;
+      const farX = x + Math.sin(rad) * map.sizeM * 3;
+      const farY = y + Math.cos(rad) * map.sizeM * 3;
+      ctx.strokeStyle = color || "#1a4d8f";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([2, 5]);
+      ctx.beginPath();
+      ctx.moveTo(px(map, x), py(map, y));
+      ctx.lineTo(px(map, farX), py(map, farY));
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
   }
+
+  // ---------- protractor (azimuth dial) ----------
+  const Protractor = (() => {
+    const svg = $("protractorSvg");
+    const needle = $("pNeedle");
+    const handle = $("pHandle");
+    const readout = $("pReadout");
+    const ticksG = $("pTicks");
+    const CX = 110, CY = 110, R_FACE = 96, R_HANDLE = 82;
+    let angle = 0;
+    let onChange = null;
+
+    // build tick marks once: every 10°, longer + labeled every 30°, 0° at top, clockwise
+    const NS = "http://www.w3.org/2000/svg";
+    for (let d = 0; d < 360; d += 10) {
+      const rad = d * Math.PI / 180;
+      const major = d % 30 === 0;
+      const rOuter = R_FACE;
+      const rInner = R_FACE - (major ? 12 : 7);
+      const x1 = CX + rOuter * Math.sin(rad), y1 = CY - rOuter * Math.cos(rad);
+      const x2 = CX + rInner * Math.sin(rad), y2 = CY - rInner * Math.cos(rad);
+      const line = document.createElementNS(NS, "line");
+      line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+      line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+      line.setAttribute("class", major ? "p-tick-major" : "p-tick");
+      ticksG.appendChild(line);
+      if (major) {
+        const rLabel = R_FACE - 22;
+        const lx = CX + rLabel * Math.sin(rad), ly = CY - rLabel * Math.cos(rad) + 3;
+        const text = document.createElementNS(NS, "text");
+        text.setAttribute("x", lx); text.setAttribute("y", ly);
+        text.setAttribute("class", "p-tick-label");
+        text.textContent = d;
+        ticksG.appendChild(text);
+      }
+    }
+
+    function setAngle(deg, fire) {
+      angle = ((deg % 360) + 360) % 360;
+      const rad = angle * Math.PI / 180;
+      const hx = CX + R_HANDLE * Math.sin(rad), hy = CY - R_HANDLE * Math.cos(rad);
+      needle.setAttribute("x2", hx.toFixed(1));
+      needle.setAttribute("y2", hy.toFixed(1));
+      handle.setAttribute("cx", hx.toFixed(1));
+      handle.setAttribute("cy", hy.toFixed(1));
+      readout.textContent = Math.round(angle) + "°";
+      if (fire && onChange) onChange(angle);
+    }
+
+    function angleFromEvent(e) {
+      const rect = svg.getBoundingClientRect();
+      const scale = rect.width / 220; // viewBox is 220x220
+      const px_ = (e.clientX - rect.left) / scale;
+      const py_ = (e.clientY - rect.top) / scale;
+      const dx = px_ - CX, dy = py_ - CY;
+      return (Math.atan2(dx, -dy) * 180 / Math.PI + 360) % 360;
+    }
+
+    let dragging = false;
+    svg.addEventListener("pointerdown", e => {
+      dragging = true;
+      svg.setPointerCapture(e.pointerId);
+      setAngle(angleFromEvent(e), true);
+    });
+    svg.addEventListener("pointermove", e => {
+      if (!dragging) return;
+      setAngle(angleFromEvent(e), true);
+    });
+    const endDrag = e => { dragging = false; try { svg.releasePointerCapture(e.pointerId); } catch (err) {} };
+    svg.addEventListener("pointerup", endDrag);
+    svg.addEventListener("pointercancel", endDrag);
+
+    return {
+      set: (deg, fire) => setAngle(deg, fire),
+      get: () => angle,
+      onChange: cb => { onChange = cb; }
+    };
+  })();
+
+  const distRange = $("distRange");
+  const distReadout = $("distReadout");
+  distRange.addEventListener("input", () => { distReadout.textContent = distRange.value; });
 
   // ---------- game state ----------
   let mode = null, map = null, round = 0, score = 0;
@@ -250,7 +347,7 @@
 
   function randPoint(margin) {
     const m = margin || 250;
-    const snap = v => Math.round(v / 100) * 100; // 6-digit precision
+    const snap = v => Math.round(v / 10) * 10; // 8-digit (10m) precision
     return {
       x: snap(m + Math.random() * (map.sizeM - 2 * m)),
       y: snap(m + Math.random() * (map.sizeM - 2 * m))
@@ -266,28 +363,38 @@
     $("navFeedback").textContent = "";
     hide($("navNext")); hide($("navSubmit"));
     hide($("navReadRow")); hide($("navAzRow"));
-    $("navGridIn").value = ""; $("navAzIn").value = ""; $("navDistIn").value = "";
+    $("navGridIn").value = "";
 
     if (mode === "plot") {
-      $("navPrompt").innerHTML = `Plot grid <b>${grid6(map, target.x, target.y)}</b> — tap the map on that point, then submit.`;
+      $("navPrompt").innerHTML = `Plot grid <b>${grid8(map, target.x, target.y)}</b> — tap the map on that point, then submit.`;
       drawMap(map, []);
       show($("navSubmit"));
       $("navSubmit").disabled = true;
     } else if (mode === "read") {
-      $("navPrompt").innerHTML = `What is the 6-digit grid of the marked point <b>✕</b>?`;
+      $("navPrompt").innerHTML = `What is the 8-digit grid of the marked point <b>✕</b>?`;
       drawMap(map, [{ ...target, shape: "x", color: "#b3202a" }]);
       show($("navReadRow")); show($("navSubmit"));
       $("navSubmit").disabled = false;
     } else {
       do { target2 = randPoint(); } while (dist(target, target2) < map.sizeM * 0.3);
-      $("navPrompt").innerHTML = `From <b>▲ start</b> to <b>● objective</b>: enter the grid azimuth (0–360°) and distance in meters.`;
-      drawMap(map, [
-        { ...target, shape: "tri", color: "#1a4d8f", label: "START" },
-        { ...target2, shape: "circle", color: "#b3202a", label: "OBJ" }
-      ]);
+      $("navPrompt").innerHTML = `From <b>▲ start</b> to <b>● objective</b>: dial in the azimuth on the protractor and drag the ruler for distance.`;
+      distRange.value = 2000;
+      distReadout.textContent = "2000";
+      Protractor.onChange(deg => redrawAzPreview(deg));
+      Protractor.set(0, false);
+      redrawAzPreview(0);
       show($("navAzRow")); show($("navSubmit"));
       $("navSubmit").disabled = false;
     }
+  }
+
+  function redrawAzPreview(angleDeg) {
+    const marks = [
+      { ...target, shape: "tri", color: "#1a4d8f", label: "START" },
+      { ...target2, shape: "circle", color: "#b3202a", label: "OBJ" }
+    ];
+    marks.ray = { x: target.x, y: target.y, angleDeg, color: "#1a4d8f" };
+    drawMap(map, marks);
   }
 
   const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -334,16 +441,17 @@
       feedback(pts, `You were <b>${d}m</b> off. (≤50m for full points.)`);
     } else if (mode === "read") {
       const raw = $("navGridIn").value.replace(/\D/g, "");
-      if (raw.length !== 6) { $("navFeedback").textContent = "Enter all 6 digits (e.g. 873456)."; return; }
-      const truth = grid6(map, target.x, target.y).replace(/\s/g, "");
-      const eOff = Math.abs(parseInt(raw.slice(0, 3), 10) - parseInt(truth.slice(0, 3), 10));
-      const nOff = Math.abs(parseInt(raw.slice(3), 10) - parseInt(truth.slice(3), 10));
-      const pts = (eOff === 0 && nOff === 0) ? 20 : (eOff <= 1 && nOff <= 1) ? 10 : 0;
-      feedback(pts, `Correct grid: <b>${grid6(map, target.x, target.y)}</b>. You said ${raw.slice(0, 3)} ${raw.slice(3)}${pts === 20 ? " — exact. ✓" : pts === 10 ? " — within 100m." : "."}`);
+      if (raw.length !== 8) { $("navFeedback").textContent = "Enter all 8 digits (e.g. 87324561)."; return; }
+      const truth = grid8(map, target.x, target.y).replace(/\s/g, "");
+      // per-axis error in meters (each 4-digit half reads to 10m)
+      const eErr = Math.abs(parseInt(raw.slice(0, 4), 10) - parseInt(truth.slice(0, 4), 10)) * 10;
+      const nErr = Math.abs(parseInt(raw.slice(4), 10) - parseInt(truth.slice(4), 10)) * 10;
+      const worst = Math.max(eErr, nErr);
+      const pts = worst <= 20 ? 20 : worst <= 50 ? 12 : worst <= 100 ? 5 : 0;
+      feedback(pts, `Correct grid: <b>${grid8(map, target.x, target.y)}</b>. You said ${raw.slice(0, 4)} ${raw.slice(4)} — off by ${worst}m${pts === 20 ? ". ✓" : "."} (≤20m for full points.)`);
     } else {
-      const az = parseFloat($("navAzIn").value);
-      const dGuess = parseFloat($("navDistIn").value);
-      if (isNaN(az) || isNaN(dGuess)) { $("navFeedback").textContent = "Enter both azimuth and distance."; return; }
+      const az = Protractor.get();
+      const dGuess = Number(distRange.value);
       const trueAz = azimuthDeg(target, target2);
       const trueD = dist(target, target2);
       let azErr = Math.abs(az - trueAz); if (azErr > 180) azErr = 360 - azErr;

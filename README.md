@@ -1,9 +1,10 @@
-# OPORD Trainer — ROTC Advanced Camp Prep
+# OPORD Trainer — Orleans Battalion Advanced Camp Prep
 
-A pocket trainer for Army ROTC cadets preparing for Advanced Camp (Cadet Summer
-Training). It randomly generates OPORDs, WARNORDs, and FRAGOs in the standard
-5-paragraph shell — set in Atropia against SAPA forces, just like camp — and
-drills you on briefing them back, battle drills, and core doctrine.
+A pocket trainer built for Orleans Battalion Army ROTC cadets preparing for
+Advanced Camp (Cadet Summer Training). It randomly generates OPORDs,
+WARNORDs, and FRAGOs in the standard 5-paragraph shell — set in Atropia
+against SAPA forces, just like camp — and drills you on briefing them back,
+land navigation, 9-line MEDEVAC requests, battle drills, and core doctrine.
 
 ## Features
 
@@ -21,16 +22,29 @@ drills you on briefing them back, battle drills, and core doctrine.
 - **Battle drills** — react to contact, squad attack, break contact, near/far
   ambush, indirect fire, patrol base priorities of work. Recite → reveal →
   self-grade.
+- **9-Line MEDEVAC practice** — a random casualty scenario (mechanism of
+  injury, terrain, security situation), then you fill in all 9 lines of the
+  request — precedence, equipment, patient count and type, security, marking,
+  nationality, terrain — scored line by line against the scenario.
 - **Interactive land nav** — a freshly generated topo-style map every round,
-  with three games: plot a 6-digit grid by tapping the map (scored by meters
-  off), read the grid of a marked point, and estimate azimuth & distance
-  between two points. Best scores are saved per mode.
+  with three games:
+  - **Plot the Point** — given an 8-digit grid, tap the map where it falls.
+  - **Read the Grid** — a point is marked; read off its 8-digit grid.
+  - **Azimuth & Distance** — a real interactive protractor: drag the dial to
+    sight the objective and read the azimuth off the degree scale, then drag
+    a ruler to measure the distance. A live sighting ray on the map updates
+    as you rotate the dial, just like sighting through a protractor and
+    straightedge on a paper map.
+
+  Best scores are saved per mode.
 - **Doctrine flashcards** — METT-TC, OAKOC, SALUTE, GOTWA, ADDRAC, 9-line
   MEDEVAC, principles of patrolling, TLPs, back azimuth, terrain features,
   and 25+ more.
 - **TLP sequence quiz** — put the 8 Troop Leading Procedures in order.
 - **Task of the day + streak tracking** — a rotating daily drill with a streak
   counter, stored on your device.
+- **Orleans Battalion branding** — an animated launch splash with the
+  battalion crest, and the crest as the app icon.
 - **Full offline PWA** — installs to your iPhone home screen and works with no
   signal (important in the field).
 
@@ -43,10 +57,20 @@ drills you on briefing them back, battle drills, and core doctrine.
 4. Launch it from the home-screen icon like any other app. It works offline
    after the first load.
 
-> Note: iOS speech recognition (Speech Check mode) needs mic permission and
-> works best in Safari. If your iOS version doesn't support speech recognition
-> in home-screen apps, open the site directly in Safari for Speech Check, or
-> use Recite & Reveal mode.
+> Note: as a home-screen web app, Speech Check mode's accuracy depends on
+> Safari's Web Speech API, which can be inconsistent on iOS. If it won't
+> start, open the site directly in Safari, or use Recite & Reveal mode
+> instead. The [native iOS app](#native-ios-app-share-with-other-cadets) uses
+> Apple's on-device Speech framework instead and doesn't have this issue.
+
+## Native iOS app (share with other cadets)
+
+This repo also builds into a real iOS app via [Capacitor](https://capacitorjs.com),
+using on-device Speech framework recognition (much more reliable than Safari's)
+and a daily local notification reminder — no App Store listing required. See
+**[docs/ios-build.md](docs/ios-build.md)** for the full step-by-step: build on
+your Mac, run on your own phone via Xcode, then distribute to your unit through
+**TestFlight** (a private link, up to 10,000 testers, no public App Store page).
 
 ## Run locally
 
@@ -62,13 +86,20 @@ python3 -m http.server 8000
 ```
 index.html            App shell and all screens
 css/style.css         Night-ops theme
+js/native.js          Capacitor bridge: native speech recognition + notifications,
+                      with automatic web fallback when not running in the app
 js/data.js            Battle drills, flashcards, TLP steps, daily tasks
 js/generator.js       Random OPORD / WARNORD / FRAGO generator + scoring keys
 js/app.js             UI logic, speech recognition, TTS, streaks
-js/landnav.js         Land nav games: procedural topo map, plot/read/azimuth
+js/landnav.js         Land nav games: procedural topo map, plot/read/azimuth,
+                      protractor dial + ruler for the azimuth/distance game
+js/medevac.js         9-Line MEDEVAC scenario generator + scoring
 sw.js                 Service worker (offline cache)
 manifest.webmanifest  PWA manifest
-icons/                App icons
+icons/                App icons, incl. the Orleans Battalion crest (SVG)
+scripts/build-www.js  Builds www/ (the Capacitor webDir) from the web app
+capacitor.config.json Capacitor project config
+ios/                  Generated Xcode project (see docs/ios-build.md)
 ```
 
 Training aid only — content is condensed from common ROTC/Ranger Handbook

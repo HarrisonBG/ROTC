@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6da8a"/>
+      <stop offset="0.5" stop-color="#d4a72c"/>
+      <stop offset="1" stop-color="#b8871c"/>
+    </linearGradient>
+    <!-- reusable fleur-de-lis: center flame + two curling side flames + band + foot -->
+    <g id="fleur">
+      <path d="M0,-52 C13,-38 12,-18 4,-4 C2,0 -2,0 -4,-4 C-12,-18 -13,-38 0,-52 Z"/>
+      <path d="M-2,-8 C-14,-14 -24,-8 -22,4 C-21,12 -12,15 -5,10 C-10,6 -10,-2 -2,-8 Z"/>
+      <path d="M2,-8 C14,-14 24,-8 22,4 C21,12 12,15 5,10 C10,6 10,-2 2,-8 Z"/>
+      <rect x="-17" y="6" width="34" height="9" rx="3"/>
+      <path d="M-6,15 L6,15 L3,32 L-3,32 Z"/>
+    </g>
+  </defs>
+
+  <!-- ribbon / scroll -->
+  <g>
+    <path d="M14,400 L130,384 L200,398 L270,384 L386,400 L348,432 L386,464 L270,448 L200,462 L130,448 L14,464 L52,432 Z"
+          fill="#a3172a" stroke="url(#gold)" stroke-width="6" stroke-linejoin="round"/>
+    <text x="110" y="434" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700"
+          font-size="27" letter-spacing="0.5" fill="#f5ecd8">ORLEANS</text>
+    <text x="290" y="434" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700"
+          font-size="27" letter-spacing="0.5" fill="#f5ecd8">BATTALION</text>
+  </g>
+
+  <!-- shield -->
+  <path d="M56,46 L344,46 L344,222 C344,308 272,362 200,404 C128,362 56,308 56,222 Z"
+        fill="url(#gold)"/>
+  <path d="M70,58 L330,58 L330,220 C330,298 266,346 200,384 C134,346 70,298 70,220 Z"
+        fill="#f4ecd8"/>
+
+  <!-- three fleur-de-lis, gold, behind the sabers -->
+  <g fill="url(#gold)">
+    <use href="#fleur" transform="translate(200,110) scale(0.85)"/>
+    <use href="#fleur" transform="translate(112,196) scale(0.78) rotate(-10)"/>
+    <use href="#fleur" transform="translate(288,196) scale(0.78) rotate(10)"/>
+  </g>
+
+  <!-- crossed sabers: blade A hilt lower-left -> tip upper-right; blade B hilt lower-right -> tip upper-left -->
+  <g fill="#1c1c1c">
+    <polygon points="190,296 186,304 300,108 292,100"/>
+    <polygon points="210,296 214,304 100,108 108,100"/>
+  </g>
+  <g>
+    <g transform="translate(190,300) rotate(20)">
+      <rect x="-25" y="-6" width="50" height="10" rx="3" fill="url(#gold)"/>
+      <rect x="-8" y="1" width="16" height="32" rx="4" fill="#1c1c1c"/>
+      <circle cx="0" cy="36" r="8" fill="url(#gold)"/>
+    </g>
+    <g transform="translate(210,300) rotate(-20)">
+      <rect x="-25" y="-6" width="50" height="10" rx="3" fill="url(#gold)"/>
+      <rect x="-8" y="1" width="16" height="32" rx="4" fill="#1c1c1c"/>
+      <circle cx="0" cy="36" r="8" fill="url(#gold)"/>
+    </g>
+  </g>
+
+  <!-- crescent moon, horns up (heraldic default orientation) -->
+  <g transform="translate(200,322)">
+    <mask id="crescentMask">
+      <rect x="-60" y="-60" width="120" height="120" fill="white"/>
+      <circle cx="0" cy="-15" r="25" fill="black"/>
+    </mask>
+    <circle cx="0" cy="0" r="29" fill="url(#gold)" stroke="#1c1c1c" stroke-width="2.5" mask="url(#crescentMask)"/>
+  </g>
+
+  <!-- shield border on top for a crisp edge -->
+  <path d="M56,46 L344,46 L344,222 C344,308 272,362 200,404 C128,362 56,308 56,222 Z"
+        fill="none" stroke="url(#gold)" stroke-width="7"/>
+</svg>
