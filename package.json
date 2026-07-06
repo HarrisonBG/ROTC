@@ -1,0 +1,21 @@
+{
+  "name": "opord-trainer",
+  "version": "1.0.0",
+  "description": "OPORD Trainer — a pocket trainer for Army ROTC cadets preparing for Advanced Camp: random OPORD/WARNORD/FRAGO generation, brief-back practice, land nav, battle drills, and doctrine flashcards.",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build:www": "node scripts/build-www.js",
+    "ios:sync": "npm run build:www && npx cap sync ios",
+    "ios:open": "npm run ios:sync && npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor-community/speech-recognition": "^6.0.1",
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/ios": "^6.1.2",
+    "@capacitor/local-notifications": "^6.1.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}

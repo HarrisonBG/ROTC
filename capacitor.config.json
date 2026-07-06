@@ -1,0 +1,11 @@
+{
+  "appId": "com.rotc.opordtrainer",
+  "appName": "OPORD Trainer",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "always"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

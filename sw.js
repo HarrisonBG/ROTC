@@ -1,9 +1,10 @@
 // OPORD Trainer service worker — cache-first for full offline use
-const CACHE = "opord-trainer-v3";
+const CACHE = "opord-trainer-v4";
 const ASSETS = [
   ".",
   "index.html",
   "css/style.css",
+  "js/native.js",
   "js/data.js",
   "js/generator.js",
   "js/app.js",

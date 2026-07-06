@@ -76,6 +76,12 @@
   })();
   refreshStats();
 
+  // In the native app, remind at 1800 daily if the task isn't logged yet.
+  // Silent no-op on the web build (NativeNotify.available is false there).
+  if (window.NativeNotify && NativeNotify.available) {
+    NativeNotify.scheduleDailyReminder(18, 0).catch(() => {});
+  }
+
   // ---------------- orders ----------------
   let currentOrder = null;
   let orderType = "OPORD";
@@ -189,12 +195,12 @@
   }
 
   // ---------------- speech check ----------------
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let recog = null, listening = false, transcript = "";
+  // NativeSpeech (js/native.js) uses on-device iOS speech recognition inside
+  // the native app shell, and falls back to the Web Speech API in a browser.
+  let listening = false, transcript = "";
 
   function stopListening() {
-    if (recog) { try { recog.stop(); } catch (e) {} }
-    listening = false;
+    if (listening) { listening = false; NativeSpeech.stop(); }
     $("micBtn").classList.remove("listening");
     $("micState").textContent = "TAP TO START";
   }
@@ -203,8 +209,8 @@
     showOrderPanel($("speechMode"));
     transcript = "";
     hide($("transcriptBox")); hide($("scoreSpeech"));
-    if (!SR) {
-      $("speechHint").textContent = "Speech recognition isn't available in this browser. On iPhone, open the app in Safari (not the home-screen icon) and try again — or use Recite & Reveal mode instead.";
+    if (!NativeSpeech.supported) {
+      $("speechHint").textContent = "Speech recognition isn't available here. On iPhone, open the app in Safari (not the home-screen icon) and try again — or use Recite & Reveal mode instead.";
       $("micBtn").style.opacity = 0.3;
     } else {
       $("speechHint").textContent = "Tap the mic, then brief the full order out loud using the OPORD shell. Tap stop when finished.";
@@ -212,37 +218,30 @@
     }
   });
 
-  $("micBtn").addEventListener("click", () => {
-    if (!SR) return;
+  $("micBtn").addEventListener("click", async () => {
+    if (!NativeSpeech.supported) return;
     if (listening) { stopListening(); return; }
     transcript = "";
-    recog = new SR();
-    recog.continuous = true;
-    recog.interimResults = true;
-    recog.lang = "en-US";
-    recog.onresult = e => {
-      let finals = "";
-      for (let i = 0; i < e.results.length; i++) {
-        if (e.results[i].isFinal) finals += e.results[i][0].transcript + " ";
-      }
-      if (finals) transcript = finals;
-      const interim = Array.from(e.results).map(r => r[0].transcript).join(" ");
-      $("transcriptText").textContent = interim || transcript;
-      show($("transcriptBox"));
-      if ((interim || transcript).trim()) show($("scoreSpeech"));
-    };
-    recog.onerror = ev => {
-      stopListening();
-      if (ev.error === "not-allowed") $("micState").textContent = "MIC PERMISSION DENIED";
-    };
-    recog.onend = () => { if (listening) { try { recog.start(); } catch (e) { stopListening(); } } };
+    listening = true;
+    $("micBtn").classList.add("listening");
+    $("micState").textContent = "LISTENING — TAP TO STOP";
     try {
-      recog.start();
-      listening = true;
-      $("micBtn").classList.add("listening");
-      $("micState").textContent = "LISTENING — TAP TO STOP";
+      const finalText = await NativeSpeech.start({
+        onInterim: text => {
+          transcript = text;
+          $("transcriptText").textContent = text;
+          show($("transcriptBox"));
+          if (text.trim()) show($("scoreSpeech"));
+        }
+      });
+      if (finalText) transcript = finalText;
     } catch (e) {
-      $("micState").textContent = "COULD NOT START MIC";
+      if (e && e.message === "not-allowed") $("micState").textContent = "MIC PERMISSION DENIED";
+      else $("micState").textContent = "COULD NOT START MIC";
+    } finally {
+      listening = false;
+      $("micBtn").classList.remove("listening");
+      if ($("micState").textContent === "LISTENING — TAP TO STOP") $("micState").textContent = "TAP TO START";
     }
   });
 
