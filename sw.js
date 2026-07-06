@@ -1,5 +1,5 @@
 // OPORD Trainer service worker — cache-first for full offline use
-const CACHE = "opord-trainer-v4";
+const CACHE = "opord-trainer-v5";
 const ASSETS = [
   ".",
   "index.html",
@@ -9,10 +9,12 @@ const ASSETS = [
   "js/generator.js",
   "js/app.js",
   "js/landnav.js",
+  "js/medevac.js",
   "manifest.webmanifest",
   "icons/icon-180.png",
   "icons/icon-192.png",
-  "icons/icon-512.png"
+  "icons/icon-512.png",
+  "icons/orleans-battalion-crest.svg"
 ];
 
 self.addEventListener("install", e => {
